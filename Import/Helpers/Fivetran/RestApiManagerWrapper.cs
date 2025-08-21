@@ -14,7 +14,7 @@ public class RestApiManagerWrapper : IDisposable
     /// This is used to perform API operations such as fetching data, managing connections, etc.
     /// It cannot be null and must be initialized before use.
     /// </summary>
-    public RestApiManager RestApiManager { get; }
+    public IRestApiManager RestApiManager { get; }
 
     /// <summary>
     /// Group ID for the Fivetran connection.
@@ -22,7 +22,6 @@ public class RestApiManagerWrapper : IDisposable
     /// It cannot be null or empty.
     /// </summary>
     public string GroupId { get; }
-    private bool _disposed = false;
 
     /// <summary>
     /// Initializes a new instance of the RestApiManagerWrapper class with the specified RestApiManager and group ID.
@@ -31,7 +30,7 @@ public class RestApiManagerWrapper : IDisposable
     /// <param name="groupId"></param>
     /// <exception cref="ArgumentNullException">Thrown when restApiManager is null.</exception>
     /// <exception cref="ArgumentException">Thrown when groupId is null or empty.</exception>
-    public RestApiManagerWrapper(RestApiManager restApiManager, string groupId)
+    public RestApiManagerWrapper(IRestApiManager restApiManager, string groupId)
     {
         RestApiManager = restApiManager ?? throw new ArgumentNullException(nameof(restApiManager), "RestApiManager cannot be null.");
 
@@ -43,17 +42,9 @@ public class RestApiManagerWrapper : IDisposable
         GroupId = groupId;
     }
 
-    /// <summary>
-    /// Disposes the RestApiManagerWrapper, releasing the resources held by the RestApiManager.
-    /// </summary>
+    /// </inheritdoc />
     public void Dispose()
     {
-        if (_disposed)
-        {
-            return;
-        }
-
-        RestApiManager.Dispose();
-        _disposed = true;
+        RestApiManager?.Dispose();
     }
 }

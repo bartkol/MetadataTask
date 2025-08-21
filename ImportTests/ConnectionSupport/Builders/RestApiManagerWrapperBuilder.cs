@@ -7,7 +7,7 @@ namespace ImportTests.ConnectionSupport.Builders;
 
 public class RestApiManagerWrapperBuilder
 {
-    private RestApiManager _restApiManager = Substitute.For<RestApiManager>(Arg.Any<string>(), Arg.Any<string>(), TimeSpan.FromSeconds(40));
+    private IRestApiManager _restApiManager = Substitute.For<IRestApiManager>();
     private string _groupId = "test_group_id";
 
     public RestApiManagerWrapperBuilder WithTimeout(TimeSpan timeout)

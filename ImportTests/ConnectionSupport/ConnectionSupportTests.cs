@@ -52,10 +52,7 @@ public class ConnectionSupportTests
     public void GetConnectionDetailsForSelection_ShouldReturnObject()
     {
         // Arrange
-        var connectionSupport = FivetranConnectionSupportBuilder.Given()
-            .WithApiKey("test_api_key")
-            .WithApiSecret("test_api_secret")
-            .Build();
+        var connectionSupport = FivetranConnectionSupportBuilder.Given().Build();
 
         // Act
         var result = connectionSupport.GetConnectionDetailsForSelection();
@@ -92,8 +89,8 @@ public class ConnectionSupportTests
         // Arrange
         var connectionSupport = FivetranConnectionSupportBuilder.Given().Build();
         var connectionDetails = FivetranConnectionDetailsForSelectionBuilder.Given()
-            .WithApiKey("test_api_key")
-            .WithApiSecret("test_api_secret")
+            .WithApiKey("test_api_key2")
+            .WithApiSecret("test_api_secret2")
             .WithTimeout(TimeSpan.FromSeconds(30))
             .Build();
 

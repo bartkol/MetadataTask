@@ -176,7 +176,8 @@ public partial class FivetranConnectionSupport : IConnectionSupport
             foundAnyConnector = true;
             var connectorSchemas = restApiManager
                 .GetConnectorSchemasAsync(connector.Id, CancellationToken.None)
-                .Result;
+                .GetAwaiter()
+                .GetResult();
 
             foreach (var schema in connectorSchemas?.Schemas ?? [])
             {

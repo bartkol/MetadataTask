@@ -14,6 +14,7 @@ public class HttpRequestHandler
     private DateTime _retryAfterTime = DateTime.UtcNow;
     private static TtlDictionary<string, HttpResponseMessage> _responseCache = new();
     private TimeSpan DefaultTtlTimespan => TimeSpan.FromMinutes(60);
+    private const int maxRetries = 5;
 
     /// <summary>
     /// Handles HttpTooManyRequests responses by limiting the number of concurrent requests and managing retry logic.
@@ -53,11 +54,16 @@ public class HttpRequestHandler
         return response;
     }
 
-    private async Task<HttpResponseMessage> _GetAsync(string url, CancellationToken cancellationToken)
+    private async Task<HttpResponseMessage> _GetAsync(string url, CancellationToken cancellationToken, int retryCount = 0)
     {
         if (this._semaphore is not null)
         {
             await this._semaphore.WaitAsync(cancellationToken);
+        }
+
+        if (retryCount > maxRetries)
+        {
+            throw new InvalidOperationException($"Maximum retry attempts exceeded ({retryCount}).");
         }
 
         try
@@ -86,7 +92,7 @@ public class HttpRequestHandler
                 }
 
                 // new request will wait for the specified time before retrying
-                return await this._GetAsync(url, cancellationToken);
+                return await this._GetAsync(url, cancellationToken, retryCount + 1);
             }
 
             response.EnsureSuccessStatusCode();

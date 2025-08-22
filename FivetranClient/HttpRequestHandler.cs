@@ -1,5 +1,4 @@
 ﻿using System.Net;
-using System.Runtime.CompilerServices;
 using FivetranClient.Infrastructure;
 
 namespace FivetranClient;
@@ -61,37 +60,41 @@ public class HttpRequestHandler
             await this._semaphore.WaitAsync(cancellationToken);
         }
 
-        TimeSpan timeToWait;
-        lock (this._lock)
+        try
         {
-            timeToWait = this._retryAfterTime - DateTime.UtcNow;
-        }
-
-        if (timeToWait > TimeSpan.Zero)
-        {
-            await Task.Delay(timeToWait, cancellationToken);
-        }
-
-        cancellationToken.ThrowIfCancellationRequested();
-
-        var response = await this._client.GetAsync(new Uri(url, UriKind.Relative), cancellationToken);
-        response.EnsureSuccessStatusCode();
-        if (response.StatusCode is HttpStatusCode.TooManyRequests)
-        {
-            var retryAfter = response.Headers.RetryAfter?.Delta ?? DefaultTtlTimespan;
-
+            TimeSpan timeToWait;
             lock (this._lock)
             {
-                this._retryAfterTime = DateTime.UtcNow.Add(retryAfter);
+                timeToWait = this._retryAfterTime - DateTime.UtcNow;
             }
 
-            this._semaphore?.Release();
+            if (timeToWait > TimeSpan.Zero)
+            {
+                await Task.Delay(timeToWait, cancellationToken);
+            }
 
-            // new request will wait for the specified time before retrying
-            return await this._GetAsync(url, cancellationToken);
+            cancellationToken.ThrowIfCancellationRequested();
+
+            var response = await this._client.GetAsync(new Uri(url, UriKind.Relative), cancellationToken);
+            if (response.StatusCode is HttpStatusCode.TooManyRequests)
+            {
+                var retryAfter = response.Headers.RetryAfter?.Delta ?? DefaultTtlTimespan;
+
+                lock (this._lock)
+                {
+                    this._retryAfterTime = DateTime.UtcNow.Add(retryAfter);
+                }
+
+                // new request will wait for the specified time before retrying
+                return await this._GetAsync(url, cancellationToken);
+            }
+
+            response.EnsureSuccessStatusCode();
+            return response;
         }
-
-        this._semaphore?.Release();
-        return response;
+        finally
+        {
+            this._semaphore?.Release();
+        }
     }
 }

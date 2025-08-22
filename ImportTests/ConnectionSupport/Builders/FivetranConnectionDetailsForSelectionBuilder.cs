@@ -14,7 +14,7 @@ public class FivetranConnectionDetailsForSelectionBuilder
 
     public FivetranConnectionDetailsForSelectionBuilder WithTimeout(TimeSpan timeout) { _timeout = timeout; return this; }
 
-    public static FivetranConnectionDetailsForSelectionBuilder Given() => new FivetranConnectionDetailsForSelectionBuilder();
+    public static FivetranConnectionDetailsForSelectionBuilder Given() => new();
 
     public FivetranConnectionDetailsForSelection Build()
     {

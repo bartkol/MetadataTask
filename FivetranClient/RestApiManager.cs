@@ -5,7 +5,8 @@ using FivetranClient.Models;
 
 namespace FivetranClient;
 
-public class RestApiManager(HttpRequestHandler requestHandler) : IDisposable
+/// </inheritdoc>
+public class RestApiManager(HttpRequestHandler requestHandler) : IRestApiManager
 {
     private readonly PaginatedFetcher _paginatedFetcher = new(requestHandler);
     private readonly NonPaginatedFetcher _nonPaginatedFetcher = new(requestHandler);
@@ -30,18 +31,21 @@ public class RestApiManager(HttpRequestHandler requestHandler) : IDisposable
     {
     }
 
+    /// </inheritdoc>
     public IAsyncEnumerable<Group> GetGroupsAsync(CancellationToken cancellationToken)
     {
         var endpointPath = "groups";
         return this._paginatedFetcher.FetchItemsAsync<Group>(endpointPath, cancellationToken);
     }
 
+    /// </inheritdoc>
     public IAsyncEnumerable<Connector> GetConnectorsAsync(string groupId, CancellationToken cancellationToken)
     {
         var endpointPath = $"groups/{WebUtility.UrlEncode(groupId)}/connectors";
         return this._paginatedFetcher.FetchItemsAsync<Connector>(endpointPath, cancellationToken);
     }
 
+    /// </inheritdoc>
     public async Task<DataSchemas?> GetConnectorSchemasAsync(
         string connectorId,
         CancellationToken cancellationToken)
@@ -50,9 +54,9 @@ public class RestApiManager(HttpRequestHandler requestHandler) : IDisposable
         return await this._nonPaginatedFetcher.FetchAsync<DataSchemas>(endpointPath, cancellationToken);
     }
 
+    /// </inheritdoc>
     public void Dispose()
     {
         _createdClient?.Dispose();
-        GC.SuppressFinalize(this);
     }
 }

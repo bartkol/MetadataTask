@@ -29,7 +29,7 @@ public class FivetranConnectionSupportBuilder
         return this;
     }
 
-    public static FivetranConnectionSupportBuilder Given() => new FivetranConnectionSupportBuilder();
+    public static FivetranConnectionSupportBuilder Given() => new();
 
     public FivetranConnectionSupport Build()
     {

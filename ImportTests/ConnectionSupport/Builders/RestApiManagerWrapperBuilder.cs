@@ -7,7 +7,7 @@ namespace ImportTests.ConnectionSupport.Builders;
 
 public class RestApiManagerWrapperBuilder
 {
-    private RestApiManager _restApiManager = Substitute.For<RestApiManager>(Arg.Any<string>(), Arg.Any<string>(), TimeSpan.FromSeconds(40));
+    private IRestApiManager _restApiManager = Substitute.For<IRestApiManager>();
     private string _groupId = "test_group_id";
 
     public RestApiManagerWrapperBuilder WithTimeout(TimeSpan timeout)
@@ -19,8 +19,8 @@ public class RestApiManagerWrapperBuilder
     public RestApiManagerWrapperBuilder WithConnectors()
     {
         var connectors = new List<Connector>() {
-            new() { Id = "connector1" },
-            new() { Id = "connector2" }
+            new("connector1", "test", "testSchema", null),
+            new("connector2", "test", "testSchema", null)
         };
         
         _restApiManager.GetConnectorsAsync(Arg.Any<string>(), Arg.Any<CancellationToken>())
@@ -39,20 +39,19 @@ public class RestApiManagerWrapperBuilder
 
     public RestApiManagerWrapperBuilder WithConnectorsSchemas()
     {
-        var schemas = new DataSchemas
-        {
-            Schemas = new Dictionary<string, Schema?>
+        var schemas = new DataSchemas(
+            new Dictionary<string, Schema?>
             {
-                { "connector1", new Schema { NameInDestination = "Schema1" } },
-                { "connector2", new Schema { NameInDestination = "Schema2" } }
+                { "connector1", new Schema("Schema1", null, []) },
+                { "connector2", new Schema("Schema2", null, []) }
             }
-        };
+        );
         _restApiManager.GetConnectorSchemasAsync(Arg.Any<string>(), Arg.Any<CancellationToken>())
             .Returns(schemas);
         return this;
     }
 
-    public static RestApiManagerWrapperBuilder Given() => new RestApiManagerWrapperBuilder();
+    public static RestApiManagerWrapperBuilder Given() => new();
 
     public RestApiManagerWrapper Build()
     {
